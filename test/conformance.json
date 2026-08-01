@@ -1,0 +1,114 @@
+[
+  {
+    "name": "plain text",
+    "source": "Summarize this.",
+    "options": {},
+    "data_plane": "Summarize this.",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "name": "qualified reference",
+    "source": "Read @file:q3-report.md",
+    "options": {},
+    "data_plane": "Read ",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "name": "declared bare entity and action",
+    "source": "@opus Summarize /concise",
+    "options": { "entities": ["opus"], "actions": ["concise"] },
+    "data_plane": " Summarize ",
+    "directives": ["reference", "action"],
+    "diagnostics": []
+  },
+  {
+    "name": "unknown bare tokens stay inert",
+    "source": "@unknown and /usr/bin",
+    "options": {},
+    "data_plane": "@unknown and /usr/bin",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "name": "email and escapes stay inert",
+    "source": "mail a@b.com and \\@model:x",
+    "options": {},
+    "data_plane": "mail a@b.com and \\@model:x",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "name": "fenced syntax stays inert",
+    "source": "```ps\n@model:openai/gpt-5.6\n```",
+    "options": {},
+    "data_plane": "```ps\n@model:openai/gpt-5.6\n```",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "name": "full width sigils and Unicode identifiers",
+    "source": "＠file:របាយការណ៍.md ／បកប្រែ",
+    "options": { "actions": ["បកប្រែ"] },
+    "data_plane": " ",
+    "directives": ["reference", "action"],
+    "diagnostics": []
+  },
+  {
+    "name": "budgeted fallback route",
+    "source": "@opus! limit(wall_time: 5s) else @model:openai/gpt-5.6@2026-07-01 else ask\nDo it",
+    "options": { "entities": ["opus"] },
+    "data_plane": "\nDo it",
+    "directives": ["route"],
+    "diagnostics": []
+  },
+  {
+    "name": "normal span keeps authored inner data",
+    "source": "Before <ps @file:glossary.md>use @file:terms.md here</ps> after",
+    "options": {},
+    "data_plane": "Before use  here after",
+    "directives": ["span", "reference"],
+    "diagnostics": []
+  },
+  {
+    "name": "declared AgencyZero authoring segment",
+    "source": "Before\n<ps @agency:items.state(id: \"item-869382d3\", status: \"active\")>\nAfter",
+    "options": { "authoring_namespaces": ["agency"] },
+    "data_plane": "Before\n\nAfter",
+    "directives": ["authoring_segment"],
+    "diagnostics": []
+  },
+  {
+    "name": "undeclared authoring segment stays inert",
+    "source": "<ps @agency:items.state(id: \"x\", status: \"active\")>",
+    "options": {},
+    "data_plane": "<ps @agency:items.state(id: \"x\", status: \"active\")>",
+    "directives": [],
+    "diagnostics": ["UNCLOSED_SPAN"]
+  },
+  {
+    "name": "strict frontmatter",
+    "source": "---ps\nversion: \"0.2\"\n---\nSummarize.",
+    "options": {},
+    "data_plane": "Summarize.",
+    "directives": ["frontmatter"],
+    "diagnostics": []
+  },
+  {
+    "name": "bidi control rejects partial parse",
+    "source": "@model:openai/gpt\u202e-5",
+    "options": {},
+    "data_plane": "@model:openai/gpt\u202e-5",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "name": "malformed qualified reference",
+    "source": "Use @model: now",
+    "options": {},
+    "data_plane": "Use @model: now",
+    "directives": [],
+    "diagnostics": ["SYNTAX_INVALID"]
+  }
+]
