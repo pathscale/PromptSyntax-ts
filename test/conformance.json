@@ -686,9 +686,9 @@
   {
     "id": "core-doctype-subset-inert",
     "name": "directive-shaped text in a declaration subset stays inert",
-    "source": "<!DOCTYPE prompt [<!ENTITY model \"@model:atlas/atlas-4\">]>",
+    "source": "<!DOCTYPE prompt [<!ELEMENT prompt ANY> @model:atlas/atlas-4]>",
     "options": {},
-    "data_plane": "<!DOCTYPE prompt [<!ENTITY model \"@model:atlas/atlas-4\">]>",
+    "data_plane": "<!DOCTYPE prompt [<!ELEMENT prompt ANY> @model:atlas/atlas-4]>",
     "directives": [],
     "diagnostics": []
   },

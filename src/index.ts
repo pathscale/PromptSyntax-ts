@@ -816,11 +816,37 @@ function otherTagEnd(source: string, start: number): number | null {
     const close = source.indexOf("]]>", start + 9);
     return close < 0 ? source.length - 1 : close + 2;
   }
+  if (source.startsWith("<!", start)) {
+    return declarationEnd(source, start + 2) ?? source.length - 1;
+  }
   let cursor = start + 1;
   if (source.startsWith("/", cursor)) cursor += 1;
   const first = codePointAt(source, cursor);
   if (first === null || (!/^\p{L}$/u.test(first) && first !== "!" && first !== "?")) return null;
   return findTagEnd(source, cursor + first.length);
+}
+
+function declarationEnd(source: string, start: number): number | null {
+  let quote: string | null = null;
+  let escaped = false;
+  let subsetDepth = 0;
+  for (let cursor = start; cursor < source.length; cursor += 1) {
+    const character = source[cursor];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\" && quote !== null) {
+      escaped = true;
+      continue;
+    }
+    if (quote !== null && character === quote) quote = null;
+    else if (quote === null && ["'", '"'].includes(character)) quote = character;
+    else if (quote === null && character === "[") subsetDepth += 1;
+    else if (quote === null && character === "]") subsetDepth = Math.max(0, subsetDepth - 1);
+    else if (quote === null && character === ">" && subsetDepth === 0) return cursor;
+  }
+  return null;
 }
 
 function urlLikeEnd(source: string, start: number): number | null {
