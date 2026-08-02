@@ -466,6 +466,14 @@ export function parsePrompt(source: string, options: ParserOptions = {}): Parsed
   return new PromptSyntaxParser(options).parse(source);
 }
 
+export {
+  produceTrace,
+  produceTraceJson,
+  type TraceProducerError,
+  TraceProducerFailure,
+  type TraceProducerInput,
+} from "./trace.js";
+
 function parseReference(source: string, start: number): Parsed<Reference> | null {
   const sigil = codePointAt(source, start);
   if (sigil === null || !["@", "＠"].includes(sigil)) return null;

@@ -66,3 +66,18 @@ bun run core-adapter \
 
 The adapter converts native UTF-16 editor offsets to canonical UTF-8 byte offsets and emits
 the complete segment tree, directive AST, source slices, and parser diagnostics.
+
+## Trace producer
+
+The Trace producer derives a user-tier Prompt Trace from deterministic execution facts. It
+does not receive an expected trace or the independent transcript used by the conformance
+runner:
+
+```bash
+bun run trace-producer producer-input.json
+```
+
+The producer derives kept, authored fallback, best-effort substitution, and refusal states.
+Contradictory facts, including strict substitution or multiple filled attempts, produce a
+typed JSON error and exit status `1`. The current contract is deliberately limited to the
+`0.1-draft` user-tier executed profile.
