@@ -36,8 +36,8 @@ references parse directly. A host may opt into its standing reverse-channel surf
 Offsets are UTF-16 string indices, matching browser editor APIs. The Rust package returns
 UTF-8 byte offsets.
 
-The initial package is private. Confirm the final npm name and code license before the
-first publish.
+The package is available from npm as [`promptsyntax`](https://www.npmjs.com/package/promptsyntax)
+under the MIT license.
 
 See [`docs/agencyzero.md`](docs/agencyzero.md) for the Advanced composer and reverse-channel
 integration seams.

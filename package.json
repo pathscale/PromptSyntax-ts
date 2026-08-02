@@ -2,11 +2,22 @@
   "name": "promptsyntax",
   "version": "0.1.0",
   "description": "A provenance-aware parser for Prompt Syntax",
+  "license": "MIT",
   "type": "module",
-  "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/pathscale/PromptSyntax-ts"
+    "url": "git+https://github.com/pathscale/PromptSyntax-ts.git"
+  },
+  "homepage": "https://github.com/pathscale/PromptSyntax-ts#readme",
+  "bugs": "https://github.com/pathscale/PromptSyntax-ts/issues",
+  "keywords": [
+    "prompt",
+    "parser",
+    "ai",
+    "control-plane"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "dist",
