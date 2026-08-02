@@ -51,3 +51,18 @@ bun test
 bun run lint
 bun run build
 ```
+
+## Core conformance adapter
+
+The adapter evaluates the specification-owned Core corpus and emits the normalized
+language-neutral result consumed by the PromptSyntax differential runner. The adapter owns
+no expected answers. Supply the canonical corpus path and the exact commit under test:
+
+```bash
+bun run core-adapter \
+  /path/to/promptsyntax.org/conformance/cases/core-parser.json \
+  0123456789abcdef0123456789abcdef01234567
+```
+
+The adapter converts native UTF-16 editor offsets to canonical UTF-8 byte offsets and emits
+the complete segment tree, directive AST, source slices, and parser diagnostics.

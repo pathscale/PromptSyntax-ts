@@ -193,6 +193,13 @@ export class PromptSyntaxParser {
 
       let parsed: Parsed<Directive> | null = null;
       const startsPs = source.startsWith("<ps", cursor) && boundaryAfterPs(source, cursor);
+      if (character === "<" && !startsPs) {
+        const otherEnd = otherTagEnd(source, cursor);
+        if (otherEnd !== null) {
+          cursor = otherEnd + 1;
+          continue;
+        }
+      }
       if (startsPs) {
         parsed = this.#parseSpan(source, cursor, base, diagnostics);
       } else if (["@", "＠"].includes(character) && boundaryBefore(source, cursor)) {
@@ -772,6 +779,14 @@ function findTagEnd(source: string, start: number): number | null {
     else if (quote === null && character === ">") return cursor;
   }
   return null;
+}
+
+function otherTagEnd(source: string, start: number): number | null {
+  let cursor = start + 1;
+  if (source.startsWith("/", cursor)) cursor += 1;
+  const first = codePointAt(source, cursor);
+  if (first === null || (!/^\p{L}$/u.test(first) && first !== "!" && first !== "?")) return null;
+  return findTagEnd(source, cursor + first.length);
 }
 
 function findSpanClose(source: string, start: number): number | null {
