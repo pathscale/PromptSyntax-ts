@@ -67,6 +67,10 @@ bun run core-adapter \
 The adapter converts native UTF-16 editor offsets to canonical UTF-8 byte offsets and emits
 the complete segment tree, directive AST, source slices, and parser diagnostics.
 
+Pass `--jsonl` after the commit to stream one compact normalized result per line. The first
+line contains implementation metadata. This mode is intended for large generated
+differential corpora and avoids retaining normalized results in memory.
+
 ## Trace producer
 
 The Trace producer derives a user-tier Prompt Trace from deterministic execution facts. It

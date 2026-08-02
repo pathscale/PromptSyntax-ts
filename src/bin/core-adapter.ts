@@ -21,9 +21,9 @@ interface Case {
     actions?: string[];
     authoring_namespaces?: string[];
   };
-  data_plane: string;
-  directives: Directive["kind"][];
-  diagnostics: DiagnosticCode[];
+  data_plane?: string;
+  directives?: Directive["kind"][];
+  diagnostics?: DiagnosticCode[];
 }
 
 interface AdapterResult {
@@ -52,9 +52,14 @@ interface CoreOutput {
   parser_diagnostics: unknown[];
 }
 
-const [casesPath, commit, ...extra] = Bun.argv.slice(2);
-if (casesPath === undefined || commit === undefined || extra.length > 0) {
-  fail("usage: bun run core-adapter <core-cases.json> <commit>");
+const [casesPath, commit, mode, ...extra] = Bun.argv.slice(2);
+if (
+  casesPath === undefined ||
+  commit === undefined ||
+  (mode !== undefined && mode !== "--jsonl") ||
+  extra.length > 0
+) {
+  fail("usage: bun run core-adapter <core-cases.json> <commit> [--jsonl]");
 }
 if (!/^[0-9a-f]{40}$/iu.test(commit)) {
   fail("commit must be a 40-character hexadecimal Git object id");
@@ -64,18 +69,27 @@ const packageJson = (await Bun.file(new URL("../../package.json", import.meta.ur
   version: string;
 };
 const cases = (await Bun.file(casesPath).json()) as Case[];
-const result: AdapterResult = {
-  format_version: "0.1-draft",
-  target: "core-parser",
-  implementation: {
-    id: "promptsyntax-ts",
-    version: packageJson.version,
-    commit,
-  },
-  results: cases.map(runCase),
+const implementation: AdapterResult["implementation"] = {
+  id: "promptsyntax-ts",
+  version: packageJson.version,
+  commit,
 };
-
-console.log(JSON.stringify(result, null, 2));
+if (mode === "--jsonl") {
+  const output = Bun.stdout.writer();
+  output.write(
+    `${JSON.stringify({ format_version: "0.1-draft", target: "core-parser", implementation })}\n`,
+  );
+  for (const fixture of cases) output.write(`${JSON.stringify(runCase(fixture))}\n`);
+  output.end();
+} else {
+  const result: AdapterResult = {
+    format_version: "0.1-draft",
+    target: "core-parser",
+    implementation,
+    results: cases.map(runCase),
+  };
+  console.log(JSON.stringify(result, null, 2));
+}
 
 function runCase(fixture: Case): CaseResult {
   const options: ParserOptions = {
@@ -90,12 +104,24 @@ function runCase(fixture: Case): CaseResult {
   const diagnostics: string[] = [];
 
   if (roundTrip !== fixture.source) diagnostics.push("CORE_ROUND_TRIP_MISMATCH");
-  if (parsed.dataPlane !== fixture.data_plane) diagnostics.push("CORE_DATA_PLANE_MISMATCH");
-  if (!sameStrings(directiveKinds, fixture.directives)) {
-    diagnostics.push("CORE_DIRECTIVE_SEQUENCE_MISMATCH");
-  }
-  if (!sameStrings(diagnosticCodes, fixture.diagnostics)) {
-    diagnostics.push("CORE_DIAGNOSTIC_SEQUENCE_MISMATCH");
+  if (
+    fixture.data_plane !== undefined &&
+    fixture.directives !== undefined &&
+    fixture.diagnostics !== undefined
+  ) {
+    if (parsed.dataPlane !== fixture.data_plane) diagnostics.push("CORE_DATA_PLANE_MISMATCH");
+    if (!sameStrings(directiveKinds, fixture.directives)) {
+      diagnostics.push("CORE_DIRECTIVE_SEQUENCE_MISMATCH");
+    }
+    if (!sameStrings(diagnosticCodes, fixture.diagnostics)) {
+      diagnostics.push("CORE_DIAGNOSTIC_SEQUENCE_MISMATCH");
+    }
+  } else if (
+    fixture.data_plane !== undefined ||
+    fixture.directives !== undefined ||
+    fixture.diagnostics !== undefined
+  ) {
+    diagnostics.push("CORE_CASE_EXPECTATION_INCOMPLETE");
   }
 
   return {

@@ -574,5 +574,338 @@
     "data_plane": "កម្ពុជា\r\n\n終わり",
     "directives": ["reference"],
     "diagnostics": []
+  },
+  {
+    "id": "core-reference-surrounded-by-tabs",
+    "name": "tabs around a qualified reference are preserved",
+    "source": "before\t@model:atlas/atlas-4\tafter",
+    "options": {},
+    "data_plane": "before\t\tafter",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-punctuation-separated-references",
+    "name": "punctuation-separated references preserve authored order",
+    "source": "@file:first.md,@file:second.md",
+    "options": {},
+    "data_plane": ",",
+    "directives": ["reference", "reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-declared-unicode-bare-entity",
+    "name": "declared Unicode bare entity resolves",
+    "source": "@អាត្លាស",
+    "options": { "entities": ["អាត្លាស"] },
+    "data_plane": "",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-action-scalar-arguments",
+    "name": "action parses every scalar category",
+    "source": "/render(title: \"Atlas\", count: 2, enabled: false, cache: null, mode: fast)",
+    "options": { "actions": ["render"] },
+    "data_plane": "",
+    "directives": ["action"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-full-width-action-arguments",
+    "name": "full width action sigil accepts arguments",
+    "source": "／បកប្រែ(to: \"km\")",
+    "options": { "actions": ["បកប្រែ"] },
+    "data_plane": "",
+    "directives": ["action"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-url-userinfo-inert",
+    "name": "at sign in URL userinfo stays inert",
+    "source": "https://user@example.test/@model:atlas/atlas-4",
+    "options": {},
+    "data_plane": "https://user@example.test/@model:atlas/atlas-4",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-escaped-action-inert",
+    "name": "escaped action sigil stays inert",
+    "source": "Use \\/translate and continue",
+    "options": { "actions": ["translate"] },
+    "data_plane": "Use \\/translate and continue",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-windows-path-inert",
+    "name": "Windows and POSIX paths stay inert",
+    "source": "C:\\Users\\atlas\\notes and /usr/local/bin",
+    "options": {},
+    "data_plane": "C:\\Users\\atlas\\notes and /usr/local/bin",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-uppercase-ps-tag-inert",
+    "name": "uppercase tag is outside the ps namespace",
+    "source": "<PS @model:atlas/atlas-4>text</PS>",
+    "options": {},
+    "data_plane": "<PS @model:atlas/atlas-4>text</PS>",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-non-ps-quoted-angle-inert",
+    "name": "angle bracket inside a quoted foreign attribute does not end the tag",
+    "source": "<widget title=\"> @model:atlas/atlas-4\">text</widget>",
+    "options": {},
+    "data_plane": "<widget title=\"> @model:atlas/atlas-4\">text</widget>",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-html-comment-angle-inert",
+    "name": "angle brackets inside an HTML comment stay inert",
+    "source": "<!-- > @model:atlas/atlas-4 < -->",
+    "options": {},
+    "data_plane": "<!-- > @model:atlas/atlas-4 < -->",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-processing-instruction-angle-inert",
+    "name": "angle bracket inside a processing instruction stays inert",
+    "source": "<?target value=\"> @model:atlas/atlas-4\"?>",
+    "options": {},
+    "data_plane": "<?target value=\"> @model:atlas/atlas-4\"?>",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-doctype-subset-inert",
+    "name": "directive-shaped text in a declaration subset stays inert",
+    "source": "<!DOCTYPE prompt [<!ENTITY model \"@model:atlas/atlas-4\">]>",
+    "options": {},
+    "data_plane": "<!DOCTYPE prompt [<!ENTITY model \"@model:atlas/atlas-4\">]>",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-arabic-no-spacing-boundary",
+    "name": "Arabic prose without a space permits a point island",
+    "source": "ملخص@model:atlas/atlas-4",
+    "options": {},
+    "data_plane": "ملخص",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-hebrew-no-spacing-boundary",
+    "name": "Hebrew prose without a space permits a point island",
+    "source": "סיכום@model:atlas/atlas-4",
+    "options": {},
+    "data_plane": "סיכום",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-thai-no-spacing-boundary",
+    "name": "Thai prose without a space permits a point island",
+    "source": "สรุป@model:atlas/atlas-4",
+    "options": {},
+    "data_plane": "สรุป",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-nfc-bare-action-resolution",
+    "name": "bare action resolution uses NFC",
+    "source": "/café",
+    "options": { "actions": ["café"] },
+    "data_plane": "",
+    "directives": ["action"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-bidi-lri-reference",
+    "name": "left-to-right isolate neutralizes a reference island",
+    "source": "@model:atlas/atlas-4\u2066x",
+    "options": {},
+    "data_plane": "@model:atlas/atlas-4\u2066x",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "id": "core-bidi-rli-action",
+    "name": "right-to-left isolate neutralizes an action island",
+    "source": "/trans\u2067late",
+    "options": { "actions": ["translate"] },
+    "data_plane": "/trans\u2067late",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "id": "core-bidi-fsi-reference",
+    "name": "first strong isolate neutralizes a reference island",
+    "source": "@file:notes\u2068.md",
+    "options": {},
+    "data_plane": "@file:notes\u2068.md",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "id": "core-bidi-pdf-action",
+    "name": "pop directional formatting neutralizes an action island",
+    "source": "/trans\u202clate",
+    "options": { "actions": ["translate"] },
+    "data_plane": "/trans\u202clate",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "id": "core-bidi-reference-argument",
+    "name": "bidi control in arguments neutralizes the whole reference island",
+    "source": "@tool:search(query: \"atlas\u2066\")",
+    "options": {},
+    "data_plane": "@tool:search(query: \"atlas\u2066\")",
+    "directives": [],
+    "diagnostics": ["BIDI_CONTROL"]
+  },
+  {
+    "id": "core-standalone-sigils-inert",
+    "name": "standalone and whitespace-separated sigils stay inert",
+    "source": "@ / ＠ ／ @ model / action",
+    "options": { "entities": ["model"], "actions": ["action"] },
+    "data_plane": "@ / ＠ ／ @ model / action",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-double-colon-reference-invalid",
+    "name": "double colon reference fails closed",
+    "source": "@model::atlas",
+    "options": {},
+    "data_plane": "@model::atlas",
+    "directives": [],
+    "diagnostics": ["SYNTAX_INVALID"]
+  },
+  {
+    "id": "core-unclosed-reference-string",
+    "name": "unclosed reference string fails closed",
+    "source": "@tool:search(query: \"atlas)",
+    "options": {},
+    "data_plane": "@tool:search(query: \"atlas)",
+    "directives": [],
+    "diagnostics": ["SYNTAX_INVALID"]
+  },
+  {
+    "id": "core-unclosed-action-arguments",
+    "name": "unclosed action arguments fail closed",
+    "source": "/translate(to: \"km\"",
+    "options": { "actions": ["translate"] },
+    "data_plane": "/translate(to: \"km\"",
+    "directives": [],
+    "diagnostics": ["SYNTAX_INVALID"]
+  },
+  {
+    "id": "core-empty-action-arguments",
+    "name": "empty action argument list is accepted",
+    "source": "/translate()",
+    "options": { "actions": ["translate"] },
+    "data_plane": "",
+    "directives": ["action"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-signed-decimal-arguments",
+    "name": "signed and decimal argument values remain typed scalars",
+    "source": "@tool:search(offset: -2, ratio: 0.5)",
+    "options": {},
+    "data_plane": "",
+    "directives": ["reference"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-strict-fallback-route",
+    "name": "strict primary may have an explicit authored fallback",
+    "source": "@model:atlas/atlas-4! else @model:atlas/atlas-mini else fail",
+    "options": {},
+    "data_plane": "",
+    "directives": ["route"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-route-followed-by-punctuation",
+    "name": "punctuation after a route remains in the data plane",
+    "source": "(@model:atlas/atlas-4 else ask).",
+    "options": {},
+    "data_plane": "().",
+    "directives": ["route"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-empty-span",
+    "name": "empty ps span is a valid control island",
+    "source": "Before <ps @file:empty.md></ps> after",
+    "options": {},
+    "data_plane": "Before  after",
+    "directives": ["span"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-span-multiple-references",
+    "name": "span header accepts multiple references",
+    "source": "<ps @file:first.md @file:second.md>Combine</ps>",
+    "options": {},
+    "data_plane": "Combine",
+    "directives": ["span"],
+    "diagnostics": []
+  },
+  {
+    "id": "core-closing-span-tag-inert",
+    "name": "closing ps tag outside a span stays inert",
+    "source": "Before </ps> after",
+    "options": {},
+    "data_plane": "Before </ps> after",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-self-closing-ps-span-invalid",
+    "name": "self-closing ps syntax fails closed as an unclosed span",
+    "source": "<ps @file:notes.md/>",
+    "options": {},
+    "data_plane": "<ps @file:notes.md/>",
+    "directives": [],
+    "diagnostics": ["UNCLOSED_SPAN"]
+  },
+  {
+    "id": "core-frontmatter-uppercase-marker-inert",
+    "name": "uppercase frontmatter marker stays content",
+    "source": "---PS\nversion: \"0.2\"\n---\nBody",
+    "options": {},
+    "data_plane": "---PS\nversion: \"0.2\"\n---\nBody",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-frontmatter-leading-bom-inert",
+    "name": "byte order mark prevents document-start frontmatter activation",
+    "source": "﻿---ps\nversion: \"0.2\"\n---\nBody",
+    "options": {},
+    "data_plane": "﻿---ps\nversion: \"0.2\"\n---\nBody",
+    "directives": [],
+    "diagnostics": []
+  },
+  {
+    "id": "core-frontmatter-nonclosing-marker",
+    "name": "closing marker with trailing text does not close frontmatter",
+    "source": "---ps\nversion: \"0.2\"\n--- trailing\nBody",
+    "options": {},
+    "data_plane": "---ps\nversion: \"0.2\"\n--- trailing\nBody",
+    "directives": [],
+    "diagnostics": ["UNCLOSED_FRONTMATTER"]
   }
 ]
