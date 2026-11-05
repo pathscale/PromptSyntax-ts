@@ -31,6 +31,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "core-adapter": "bun src/bin/core-adapter.ts",
+    "trace-producer": "bun src/bin/trace-producer.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "lint": "biome check .",

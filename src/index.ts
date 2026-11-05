@@ -179,6 +179,12 @@ export class PromptSyntaxParser {
         continue;
       }
 
+      const urlEnd = urlLikeEnd(source, cursor);
+      if (urlEnd !== null) {
+        cursor = urlEnd;
+        continue;
+      }
+
       const character = codePointAt(source, cursor);
       if (character === null) break;
 
@@ -193,6 +199,13 @@ export class PromptSyntaxParser {
 
       let parsed: Parsed<Directive> | null = null;
       const startsPs = source.startsWith("<ps", cursor) && boundaryAfterPs(source, cursor);
+      if (character === "<" && !startsPs) {
+        const otherEnd = otherTagEnd(source, cursor);
+        if (otherEnd !== null) {
+          cursor = otherEnd + 1;
+          continue;
+        }
+      }
       if (startsPs) {
         parsed = this.#parseSpan(source, cursor, base, diagnostics);
       } else if (["@", "＠"].includes(character) && boundaryBefore(source, cursor)) {
@@ -242,7 +255,7 @@ export class PromptSyntaxParser {
       return null;
     }
 
-    const hintedEnd = islandHintEnd(source, start);
+    const hintedEnd = Math.max(islandHintEnd(source, start), reference.end);
     if (BIDI.test(source.slice(start, hintedEnd))) {
       diagnostics.push(bidiDiagnostic(base + start, base + hintedEnd));
       return null;
@@ -310,14 +323,26 @@ export class PromptSyntaxParser {
     diagnostics: Diagnostic[],
   ): Parsed<Directive> | null {
     const action = parseAction(source, start);
-    if (action === null) return null;
-    const hintedEnd = islandHintEnd(source, start);
+    if (action === null) {
+      if (this.#actionPrefixIsLive(source, start)) {
+        diagnostics.push(syntaxDiagnostic(base + start, base + islandHintEnd(source, start)));
+      }
+      return null;
+    }
+    const hintedEnd = Math.max(islandHintEnd(source, start), action.end);
     if (BIDI.test(source.slice(start, hintedEnd))) {
       diagnostics.push(bidiDiagnostic(base + start, base + hintedEnd));
       return null;
     }
     if (!this.#actions.has(normalize(action.value.name))) return null;
     return { end: action.end, value: { kind: "action", action: action.value } };
+  }
+
+  #actionPrefixIsLive(source: string, start: number): boolean {
+    const sigil = codePointAt(source, start);
+    if (sigil === null) return false;
+    const parsed = parseNameToken(source, start + sigil.length);
+    return parsed !== null && this.#actions.has(normalize(parsed.value));
   }
 
   #parseSpan(
@@ -458,6 +483,14 @@ export class PromptSyntaxParser {
 export function parsePrompt(source: string, options: ParserOptions = {}): ParsedPrompt {
   return new PromptSyntaxParser(options).parse(source);
 }
+
+export {
+  produceTrace,
+  produceTraceJson,
+  type TraceProducerError,
+  TraceProducerFailure,
+  type TraceProducerInput,
+} from "./trace.js";
 
 function parseReference(source: string, start: number): Parsed<Reference> | null {
   const sigil = codePointAt(source, start);
@@ -772,6 +805,76 @@ function findTagEnd(source: string, start: number): number | null {
     else if (quote === null && character === ">") return cursor;
   }
   return null;
+}
+
+function otherTagEnd(source: string, start: number): number | null {
+  if (source.startsWith("<!--", start)) {
+    const close = source.indexOf("-->", start + 4);
+    return close < 0 ? source.length - 1 : close + 2;
+  }
+  if (source.startsWith("<![CDATA[", start)) {
+    const close = source.indexOf("]]>", start + 9);
+    return close < 0 ? source.length - 1 : close + 2;
+  }
+  if (source.startsWith("<!", start)) {
+    return declarationEnd(source, start + 2) ?? source.length - 1;
+  }
+  let cursor = start + 1;
+  if (source.startsWith("/", cursor)) cursor += 1;
+  const first = codePointAt(source, cursor);
+  if (first === null || (!/^\p{L}$/u.test(first) && first !== "!" && first !== "?")) return null;
+  return findTagEnd(source, cursor + first.length);
+}
+
+function declarationEnd(source: string, start: number): number | null {
+  let quote: string | null = null;
+  let escaped = false;
+  let subsetDepth = 0;
+  for (let cursor = start; cursor < source.length; cursor += 1) {
+    const character = source[cursor];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\" && quote !== null) {
+      escaped = true;
+      continue;
+    }
+    if (quote !== null && character === quote) quote = null;
+    else if (quote === null && ["'", '"'].includes(character)) quote = character;
+    else if (quote === null && character === "[") subsetDepth += 1;
+    else if (quote === null && character === "]") subsetDepth = Math.max(0, subsetDepth - 1);
+    else if (quote === null && character === ">" && subsetDepth === 0) return cursor;
+  }
+  return null;
+}
+
+function urlLikeEnd(source: string, start: number): number | null {
+  const previous = codePointBefore(source, start);
+  if (
+    previous !== null &&
+    (/^[\p{L}\p{N}_]$/u.test(previous) || ["+", ".", "-"].includes(previous))
+  ) {
+    return null;
+  }
+  const first = codePointAt(source, start);
+  if (first === null || !/^[A-Za-z]$/u.test(first)) return null;
+  let cursor = start + first.length;
+  while (cursor < source.length) {
+    const character = codePointAt(source, cursor);
+    if (character === null || !/^[A-Za-z0-9+.-]$/u.test(character)) break;
+    cursor += character.length;
+  }
+  if (!source.startsWith("://", cursor)) return null;
+  cursor += 3;
+  while (cursor < source.length) {
+    const character = codePointAt(source, cursor);
+    if (character === null || /^\s$/u.test(character) || ["<", ">", '"', "'"].includes(character)) {
+      break;
+    }
+    cursor += character.length;
+  }
+  return cursor;
 }
 
 function findSpanClose(source: string, start: number): number | null {
