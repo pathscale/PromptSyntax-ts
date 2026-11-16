@@ -42,6 +42,14 @@ describe("PromptSyntaxParser", () => {
     expect(parsed.directives).toHaveLength(0);
   });
 
+  test("keeps URL and markup-comment directive shapes inert", () => {
+    const source = "https://example.test/@model:atlas/atlas-4 <!-- > @file:notes.md -->";
+    const parsed = new PromptSyntaxParser().parse(source);
+    expect(parsed.dataPlane).toBe(source);
+    expect(parsed.directives).toHaveLength(0);
+    expect(parsed.diagnostics).toHaveLength(0);
+  });
+
   test("supports full-width sigils and Unicode names", () => {
     const parsed = new PromptSyntaxParser({ actions: ["បកប្រែ"] }).parse(
       "＠file:របាយការណ៍.md ／បកប្រែ",
@@ -136,6 +144,22 @@ describe("PromptSyntaxParser", () => {
     expect(parsed.dataPlane).toBe(source);
     expect(parsed.directives).toHaveLength(0);
     expect(parsed.diagnostics[0].code).toBe("BIDI_CONTROL");
+  });
+
+  test("rejects bidi controls inside quoted arguments", () => {
+    const source = '@tool:search(query: "atlas\u2066")';
+    const parsed = new PromptSyntaxParser().parse(source);
+    expect(parsed.dataPlane).toBe(source);
+    expect(parsed.directives).toHaveLength(0);
+    expect(parsed.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["BIDI_CONTROL"]);
+  });
+
+  test("reports malformed declared actions", () => {
+    const source = '/translate(to: "km"';
+    const parsed = new PromptSyntaxParser({ actions: ["translate"] }).parse(source);
+    expect(parsed.dataPlane).toBe(source);
+    expect(parsed.directives).toHaveLength(0);
+    expect(parsed.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["SYNTAX_INVALID"]);
   });
 
   test("reports malformed qualified references as inert text", () => {
