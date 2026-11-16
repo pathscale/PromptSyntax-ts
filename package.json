@@ -1,6 +1,6 @@
 {
   "name": "promptsyntax",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A provenance-aware parser for Prompt Syntax",
   "license": "MIT",
   "type": "module",
@@ -31,6 +31,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "core-adapter": "bun src/bin/core-adapter.ts",
+    "trace-producer": "bun src/bin/trace-producer.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "lint": "biome check .",

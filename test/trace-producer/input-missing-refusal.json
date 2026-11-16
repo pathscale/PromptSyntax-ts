@@ -1,0 +1,41 @@
+{
+  "format_version": "0.1-draft",
+  "turn": "turn-producer-invalid-missing-refusal",
+  "tier": "user",
+  "mode": "executed",
+  "content_mode": "tiered",
+  "venue": { "id": "venue:example", "capability_document": "https://venue.example/cap.json" },
+  "coverage": {
+    "routing": "complete",
+    "assembly": "user-initiated-only",
+    "inline_threshold_bytes": 4096
+  },
+  "inferences": [
+    {
+      "id": "inference-invalid-missing-refusal",
+      "kind": "user-initiated",
+      "compiled_request_utf8": "Summarize.",
+      "routing": {
+        "requested": "@model:example/atlas-4@2026-08-01!",
+        "policy": "strict",
+        "route": [
+          {
+            "ref": "@model:example/atlas-4@2026-08-01!",
+            "canonical": "model:example/atlas-4@2026-08-01",
+            "rule": "qualified-canonical-reference",
+            "ambiguity_surfaced": false
+          }
+        ],
+        "attempts": [
+          {
+            "ref": "@model:example/atlas-4@2026-08-01!",
+            "outcome": "failed",
+            "reasons": ["ENTITY_UNAVAILABLE"]
+          }
+        ],
+        "non_entity_fill": []
+      }
+    }
+  ],
+  "boundaries": []
+}

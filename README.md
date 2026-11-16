@@ -42,6 +42,18 @@ under the MIT license.
 See [`docs/agencyzero.md`](docs/agencyzero.md) for the Advanced composer and reverse-channel
 integration seams.
 
+## 0.2.0 behaviour changes
+
+0.2.0 is a minor-version release that changes parse results for some inputs:
+
+- Directive-shaped text inside URLs (`https://example.test/@model:atlas/atlas-4`), HTML
+  comments, CDATA sections, declarations and other foreign markup tags is inert data-plane
+  text. Earlier releases could parse it as directives.
+- A malformed action whose name is declared in `actions` emits a `SYNTAX_INVALID` diagnostic
+  instead of passing as plain text.
+- An unclosed `<!--`, `<![CDATA[` or `<!` opener keeps only the rest of its own line inert and
+  emits a `SYNTAX_INVALID` diagnostic. Directives on later lines still parse.
+
 ## Development
 
 ```bash
@@ -51,3 +63,37 @@ bun test
 bun run lint
 bun run build
 ```
+
+## Core conformance adapter
+
+The adapter evaluates the specification-owned Core corpus and emits the normalized
+language-neutral result consumed by the PromptSyntax differential runner. The adapter owns
+no expected answers. Supply the canonical corpus path and the exact commit under test:
+
+```bash
+bun run core-adapter \
+  /path/to/promptsyntax.org/conformance/cases/core-parser.json \
+  0123456789abcdef0123456789abcdef01234567
+```
+
+The adapter converts native UTF-16 editor offsets to canonical UTF-8 byte offsets and emits
+the complete segment tree, directive AST, source slices, and parser diagnostics.
+
+Pass `--jsonl` after the commit to stream one compact normalized result per line. The first
+line contains implementation metadata. This mode is intended for large generated
+differential corpora and avoids retaining normalized results in memory.
+
+## Trace producer
+
+The Trace producer derives a user-tier Prompt Trace from deterministic execution facts. It
+does not receive an expected trace or the independent transcript used by the conformance
+runner:
+
+```bash
+bun run trace-producer producer-input.json
+```
+
+The producer derives kept, authored fallback, best-effort substitution, and refusal states.
+Contradictory facts, including strict substitution or multiple filled attempts, produce a
+typed JSON error and exit status `1`. The current contract is deliberately limited to the
+`0.1-draft` user-tier executed profile.
